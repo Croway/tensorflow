@@ -1,0 +1,37 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div style="text-align:center">
+  <h1>
+    Welcome to {{ title }}!
+  </h1>
+  <p *ngIf="loadingPosenet">
+    Loading posenet...
+  </p>
+  <p *ngIf="!loadingPosenet">
+    Posenet loaded!
+  </p>
+  <p *ngIf="loadingMobilenet">
+    Loading mobilenet...
+  </p>
+  <p *ngIf="!loadingMobilenet">
+    Mobilenet loaded!
+  </p>
+
+  <section>
+    <label for="upload">Upload image </label>
+    <input [disabled]="loadingPosenet && loadingMobilenet" id="upload" style="display: inline" type="file" accept="image/*" (change)="handleInputChange($event)" />
+  </section>
+
+  <section style="margin-top: 20px">
+    <img id='test' [src]='img' />
+    <div style="display: inline" id="canvasDiv"></div>
+  </section>
+
+  <section *ngIf="predictions">
+    <h2>Predictions</h2>
+    <ul>
+      <li *ngFor="let prediction of predictions">
+        Name: {{prediction.className}} - probability: {{prediction.probability}}
+      </li>
+    </ul>
+  </section>
+</div>
