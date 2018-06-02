@@ -18,7 +18,7 @@
 
   <section>
     <label for="upload">Upload image </label>
-    <input [disabled]="loadingPosenet && loadingMobilenet" id="upload" style="display: inline" type="file" accept="image/*" (change)="handleInputChange($event)" />
+    <input [disabled]="loadingPosenet || loadingMobilenet" id="upload" style="display: inline" type="file" accept="image/*" (change)="handleInputChange($event)" />
   </section>
 
   <section style="margin-top: 20px">
