@@ -2,6 +2,10 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.1.
 
+## Quick guide
+
+Wait for Posenet and Mobilenet to load and upload an image, The points returned from posenet will be drawn on the uploaded image and the predictions of mobilenet will be shown at the bottom
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
