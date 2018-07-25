@@ -16,9 +16,100 @@ export class AppComponent implements OnInit {
   net: posenet.PoseNet;
   model: mobilenet.MobileNet;
   img: any;
+  video: any;
+  img2: any;
+
+  startTimer() {
+    let elem = this;
+
+    var canvas: any = document.getElementById('canvas');
+
+    var cnvsCtx = canvas.getContext("2d");
+    cnvsCtx.fillStyle = "red";
+    cnvsCtx.font = "15px Verdana";
+
+    function takeScreenshot(elem) {
+      cnvsCtx.clearRect(0, 0, 800, 800);
+
+      async function estimatePoseOnVideo(videoElement) {
+        const imageScaleFactor = 0.5;
+        const outputStride = 16;
+        const flipHorizontal = false;
+
+        const pose = await elem.net.estimateSinglePose(videoElement, imageScaleFactor, flipHorizontal, outputStride);
+
+        return pose;
+      }
+
+      const pose = estimatePoseOnVideo(elem.video);
+
+      function drawPoint(x, y, part, cnvsCtx) {
+        cnvsCtx.fillText(part, x, y);
+        // cnvsCtx.beginPath();
+        // cnvsCtx.fillRect(x, y, 2, 2);
+        // cnvsCtx.stroke();
+      }
+
+      function drawLine(posA, posB, ctx) {
+        ctx.beginPath();
+        ctx.strokeStyle = "#FF0000";
+        ctx.moveTo(posA.x, posA.y);
+        ctx.lineTo(posB.x, posB.y);
+        ctx.stroke();
+      }
+
+      pose.then(joints => {
+        console.log("joints");
+        console.log(joints);
+
+        for (let joint of joints.keypoints) {
+          drawPoint(joint.position.x, joint.position.y, joint.part, cnvsCtx);
+        }
+
+        // UPPER
+        drawLine(joints.keypoints[5].position, joints.keypoints[6].position, cnvsCtx);
+        drawLine(joints.keypoints[5].position, joints.keypoints[7].position, cnvsCtx);
+        drawLine(joints.keypoints[9].position, joints.keypoints[7].position, cnvsCtx);
+        drawLine(joints.keypoints[6].position, joints.keypoints[8].position, cnvsCtx);
+        drawLine(joints.keypoints[10].position, joints.keypoints[8].position, cnvsCtx);
+        // LOWER
+        drawLine(joints.keypoints[11].position, joints.keypoints[12].position, cnvsCtx);
+        drawLine(joints.keypoints[11].position, joints.keypoints[13].position, cnvsCtx);
+        drawLine(joints.keypoints[15].position, joints.keypoints[13].position, cnvsCtx);
+        drawLine(joints.keypoints[12].position, joints.keypoints[14].position, cnvsCtx);
+        drawLine(joints.keypoints[16].position, joints.keypoints[14].position, cnvsCtx);
+      })
+    }
+
+    function objRecog(elem) {
+      async function predictImage(videoElement) {
+        // Classify the image.
+        elem.predictions = await elem.model.classify(videoElement);
+      }
+
+      predictImage(elem.video).then(p => elem.loadingMobilenet = false, err => console.error(err));
+    }
+
+    setInterval(function() { objRecog(elem), 2000});
+
+    setInterval(function () { takeScreenshot(elem) }, 100);
+  }
+
 
   ngOnInit() {
     let elem = this;
+
+    var video: any = document.getElementById('video');
+
+    // Get access to the camera!
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Not adding `{ audio: true }` since we only want video now
+      navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+        video.src = window.URL.createObjectURL(stream);
+        video.play();
+        elem.video = video;
+      });
+    }
 
     async function loadPosenet() {
       // load the posenet model from a checkpoint
@@ -104,7 +195,7 @@ export class AppComponent implements OnInit {
 
       function drawLine(posA, posB, ctx) {
         ctx.beginPath();
-        ctx.strokeStyle="#FF0000";
+        ctx.strokeStyle = "#FF0000";
         ctx.moveTo(posA.x, posA.y);
         ctx.lineTo(posB.x, posB.y);
         ctx.stroke();
